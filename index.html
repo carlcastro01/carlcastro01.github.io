@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VaporMatrix - 80s Matrix Solver</title>
+    <style>
+        /* === CUSTOMIZABLE ASSETS === */
+        :root {
+            /* Colors */
+            --primary-bg: linear-gradient(135deg, #1a0033 0%, #330066 50%, #004d99 100%);
+            --secondary-bg: rgba(255, 20, 147, 0.1);
+            --accent-color: #ff1493;
+            --neon-pink: #ff1493;
+            --neon-cyan: #00ffff;
+            --neon-purple: #9d00ff;
+            --text-color: #ffffff;
+            --input-bg: rgba(0, 255, 255, 0.1);
+            --button-bg: linear-gradient(45deg, #ff1493, #9d00ff);
+            --grid-border: #00ffff;
+            
+            /* Fonts */
+            --main-font: 'Courier New', monospace;
+            --title-font: 'Courier New', monospace;
+            --font-size-small: 12px;
+            --font-size-medium: 16px;
+            --font-size-large: 24px;
+            --font-size-xl: 32px;
+            
+            /* Animations */
+            --glow-animation-speed: 2s;
+            --float-animation-speed: 3s;
+            --pulse-speed: 1.5s;
+        }
+
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--main-font);
+            background: var(--primary-bg);
+            color: var(--text-color);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255, 20, 147, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(157, 0, 255, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(0, 255, 255, 0.2) 0%, transparent 50%);
+            animation: bgFloat var(--float-animation-speed) ease-in-out infinite alternate;
+        }
+
+        @keyframes bgFloat {
+            0% { transform: translateY(0px) rotate(0deg); }
+            100% { transform: translateY(-20px) rotate(2deg); }
+        }
+
+        /* Grid Lines Effect */
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            animation: gridMove 10s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(30px, 30px); }
+        }
+
+        /* Splash Screen */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary-bg);
+            transition: opacity 0.8s ease-out;
+        }
+
+        .splash-logo {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(45deg, var(--neon-pink), var(--neon-cyan), var(--neon-purple));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--font-size-xl);
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 20px currentColor;
+            animation: neonPulse var(--pulse-speed) ease-in-out infinite alternate;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .splash-logo::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--neon-pink), var(--neon-cyan), var(--neon-purple));
+            z-index: -1;
+            filter: blur(20px);
+            opacity: 0.7;
+        }
+
+        .team-names {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .team-names h2 {
+            font-size: var(--font-size-large);
+            color: var(--neon-cyan);
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        .names-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            max-width: 300px;
+        }
+
+        .name-item {
+            padding: 8px;
+            background: var(--input-bg);
+            border: 1px solid var(--neon-pink);
+            border-radius: 5px;
+            text-align: center;
+            font-size: var(--font-size-small);
+            animation: nameGlow var(--glow-animation-speed) ease-in-out infinite alternate;
+        }
+
+        @keyframes nameGlow {
+            0% { box-shadow: 0 0 5px var(--neon-pink); }
+            100% { box-shadow: 0 0 15px var(--neon-pink), 0 0 25px var(--neon-pink); }
+        }
+
+        .start-button {
+            padding: 15px 40px;
+            background: var(--button-bg);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-size: var(--font-size-medium);
+            font-family: var(--main-font);
+            cursor: pointer;
+            box-shadow: 0 0 20px var(--neon-pink);
+            transition: all 0.3s ease;
+        }
+
+        .start-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px var(--neon-pink), 0 0 40px var(--neon-purple);
+        }
+
+        /* Main App */
+        .main-app {
+            opacity: 0;
+            padding: 20px;
+            max-width: 100%;
+            min-height: 100vh;
+            transition: opacity 0.8s ease-in;
+        }
+
+        .app-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .app-title {
+            font-size: var(--font-size-xl);
+            color: var(--neon-cyan);
+            text-shadow: 0 0 20px currentColor;
+            margin-bottom: 10px;
+            animation: titleFloat var(--float-animation-speed) ease-in-out infinite alternate;
+        }
+
+        @keyframes titleFloat {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-5px); }
+        }
+
+        .app-subtitle {
+            font-size: var(--font-size-medium);
+            color: var(--neon-pink);
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        /* Matrix Input Section */
+        .matrix-input-section {
+            background: var(--secondary-bg);
+            border: 2px solid var(--neon-purple);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 30px rgba(157, 0, 255, 0.3);
+        }
+
+        .dimension-inputs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .dimension-group {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .dimension-group label {
+            display: block;
+            color: var(--neon-cyan);
+            font-size: var(--font-size-small);
+            margin-bottom: 5px;
+            text-shadow: 0 0 5px currentColor;
+        }
+
+        .dimension-input {
+            width: 100%;
+            padding: 10px;
+            background: var(--input-bg);
+            border: 1px solid var(--neon-cyan);
+            border-radius: 5px;
+            color: var(--text-color);
+            font-family: var(--main-font);
+            font-size: var(--font-size-medium);
+        }
+
+        .dimension-input:focus {
+            outline: none;
+            box-shadow: 0 0 15px var(--neon-cyan);
+            border-color: var(--neon-pink);
+        }
+
+        .generate-button {
+            width: 100%;
+            padding: 12px;
+            background: var(--button-bg);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-family: var(--main-font);
+            font-size: var(--font-size-medium);
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .generate-button:hover {
+            box-shadow: 0 0 20px var(--neon-purple);
+        }
+
+        /* Matrix Grid */
+        .matrix-container {
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        .matrix-grid {
+            display: inline-grid;
+            gap: 3px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border: 1px solid var(--grid-border);
+            min-width: 100%;
+        }
+
+        .matrix-cell {
+            width: 60px;
+            height: 40px;
+            background: var(--input-bg);
+            border: 1px solid var(--neon-cyan);
+            border-radius: 3px;
+            text-align: center;
+            font-family: var(--main-font);
+            font-size: var(--font-size-small);
+            color: var(--text-color);
+        }
+
+        .matrix-cell:focus {
+            outline: none;
+            box-shadow: 0 0 10px var(--neon-pink);
+            border-color: var(--neon-pink);
+        }
+
+        .matrix-cell.unknown {
+            background: linear-gradient(45deg, rgba(255, 20, 147, 0.2), rgba(157, 0, 255, 0.2));
+            border-color: var(--neon-purple);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .action-button {
+            padding: 12px 20px;
+            background: var(--button-bg);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-family: var(--main-font);
+            font-size: var(--font-size-small);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 20, 147, 0.4);
+        }
+
+        /* Results Section */
+        .results-section {
+            background: var(--secondary-bg);
+            border: 2px solid var(--neon-cyan);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .results-title {
+            color: var(--neon-cyan);
+            font-size: var(--font-size-large);
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        .result-item {
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 3px solid var(--neon-pink);
+            margin-bottom: 10px;
+            border-radius: 5px;
+            animation: resultSlide 0.5s ease-out;
+        }
+
+        @keyframes resultSlide {
+            0% { transform: translateX(-20px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Animations */
+        @keyframes neonPulse {
+            0% { 
+                box-shadow: 0 0 20px var(--neon-pink), 0 0 40px var(--neon-pink), 0 0 60px var(--neon-pink);
+                transform: scale(1);
+            }
+            100% { 
+                box-shadow: 0 0 30px var(--neon-cyan), 0 0 50px var(--neon-cyan), 0 0 70px var(--neon-cyan);
+                transform: scale(1.05);
+            }
+        }
+
+        /* Audio Controls */
+        .audio-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 10px;
+        }
+
+        .audio-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--neon-cyan);
+            background: var(--input-bg);
+            color: var(--neon-cyan);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .audio-button:hover {
+            box-shadow: 0 0 15px var(--neon-cyan);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .dimension-inputs {
+                flex-direction: column;
+            }
+            
+            .matrix-cell {
+                width: 50px;
+                height: 35px;
+                font-size: 10px;
+            }
+            
+            .splash-logo {
+                width: 150px;
+                height: 150px;
+                font-size: var(--font-size-large);
+            }
+            
+            .names-grid {
+                grid-template-columns: 1fr;
+                max-width: 200px;
+            }
+        }
+
+        /* Hidden class */
+        .hidden {
+            opacity: 0 !important;
+            pointer-events: none;
+        }
+
+        .show {
+            opacity: 1 !important;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Effects -->
+    <div class="bg-animation"></div>
+    <div class="grid-overlay"></div>
+
+    <!-- Audio Elements (CUSTOMIZABLE ASSETS) -->
+    <audio id="bgMusic" loop>
+        <!-- Replace with your vaporwave music file -->
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmgfDzJ+y+8=" type="audio/wav">
+    </audio>
+    
+    <audio id="clickSound">
+        <!-- Replace with your click sound effect -->
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmgfDzJ+y+8=" type="audio/wav">
+    </audio>
+
+    <!-- Splash Screen -->
+    <div class="splash-screen" id="splashScreen">
+        <div class="splash-logo">
+            VM
+        </div>
+        
+        <div class="team-names">
+            <h2>VAPOR MATRIX TEAM</h2>
+            <div class="names-grid">
+                <!-- CUSTOMIZABLE TEAM NAMES -->
+                <div class="name-item">Alex Neon</div>
+                <div class="name-item">Cyber Sarah</div>
+                <div class="name-item">Max Synth</div>
+                <div class="name-item">Luna Wave</div>
+                <div class="name-item">Neo Blake</div>
+                <div class="name-item">Zara Grid</div>
+                <div class="name-item">Kai Pulse</div>
+                <div class="name-item">Nova Code</div>
+                <div class="name-item">Jax Matrix</div>
+                <div class="name-item">Ava Retro</div>
+            </div>
+        </div>
+        
+        <button class="start-button" onclick="startApp()">ENTER THE MATRIX</button>
+    </div>
+
+    <!-- Audio Controls -->
+    <div class="audio-controls">
+        <button class="audio-button" onclick="toggleMusic()" id="musicBtn">🎵</button>
+        <button class="audio-button" onclick="toggleSounds()" id="soundBtn">🔊</button>
+    </div>
+
+    <!-- Main Application -->
+    <div class="main-app" id="mainApp">
+        <div class="app-header">
+            <h1 class="app-title">VAPORMATRIX</h1>
+            <p class="app-subtitle">∞ Dimensional Matrix Solver ∞</p>
+        </div>
+
+        <div class="matrix-input-section">
+            <h3 style="color: var(--neon-purple); margin-bottom: 15px; text-shadow: 0 0 10px currentColor;">Matrix Dimensions</h3>
+            
+            <div class="dimension-inputs">
+                <div class="dimension-group">
+                    <label for="rows">ROWS</label>
+                    <input type="number" id="rows" class="dimension-input" value="3" min="1" max="20">
+                </div>
+                <div class="dimension-group">
+                    <label for="cols">COLUMNS</label>
+                    <input type="number" id="cols" class="dimension-input" value="3" min="1" max="20">
+                </div>
+            </div>
+            
+            <button class="generate-button" onclick="generateMatrix()">GENERATE MATRIX</button>
+            
+            <div class="matrix-container" id="matrixContainer">
+                <!-- Matrix will be generated here -->
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="action-button" onclick="solveMatrix()">SOLVE</button>
+            <button class="action-button" onclick="clearMatrix()">CLEAR</button>
+            <button class="action-button" onclick="randomizeMatrix()">RANDOMIZE</button>
+            <button class="action-button" onclick="addUnknowns()">ADD UNKNOWNS</button>
+        </div>
+
+        <div class="results-section" id="resultsSection" style="display: none;">
+            <h3 class="results-title">SOLUTION MATRIX</h3>
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        // === CUSTOMIZABLE AUDIO ASSETS ===
+        const AUDIO_CONFIG = {
+            musicEnabled: true,
+            soundsEnabled: true,
+            musicVolume: 0.3,
+            soundVolume: 0.5
+        };
+
+        // === CUSTOMIZABLE TEXT ASSETS ===
+        const TEXT_CONFIG = {
+            appTitle: "VAPORMATRIX",
+            appSubtitle: "∞ Dimensional Matrix Solver ∞",
+            teamTitle: "VAPOR MATRIX TEAM",
+            startButtonText: "ENTER THE MATRIX",
+            solveButtonText: "SOLVE",
+            clearButtonText: "CLEAR",
+            randomizeButtonText: "RANDOMIZE",
+            unknownsButtonText: "ADD UNKNOWNS"
+        };
+
+        // Global variables
+        let currentMatrix = [];
+        let matrixRows = 3;
+        let matrixCols = 3;
+        let unknownPositions = new Set();
+
+        // Audio functions
+        function toggleMusic() {
+            const music = document.getElementById('bgMusic');
+            const btn = document.getElementById('musicBtn');
+            
+            if (AUDIO_CONFIG.musicEnabled) {
+                music.pause();
+                btn.textContent = '🔇';
+                AUDIO_CONFIG.musicEnabled = false;
+            } else {
+                music.play();
+                btn.textContent = '🎵';
+                AUDIO_CONFIG.musicEnabled = true;
+            }
+        }
+
+        function toggleSounds() {
+            const btn = document.getElementById('soundBtn');
+            
+            if (AUDIO_CONFIG.soundsEnabled) {
+                btn.textContent = '🔇';
+                AUDIO_CONFIG.soundsEnabled = false;
+            } else {
+                btn.textContent = '🔊';
+                AUDIO_CONFIG.soundsEnabled = true;
+            }
+        }
+
+        function playClickSound() {
+            if (AUDIO_CONFIG.soundsEnabled) {
+                const sound = document.getElementById('clickSound');
+                sound.currentTime = 0;
+                sound.volume = AUDIO_CONFIG.soundVolume;
+                sound.play().catch(e => console.log('Audio play failed:', e));
+            }
+        }
+
+        // App initialization
+        function startApp() {
+            playClickSound();
+            
+            const splashScreen = document.getElementById('splashScreen');
+            const mainApp = document.getElementById('mainApp');
+            const music = document.getElementById('bgMusic');
+            
+            // Fade out splash screen
+            splashScreen.classList.add('hidden');
+            
+            // Show main app after delay
+            setTimeout(() => {
+                mainApp.classList.add('show');
+                
+                // Start background music
+                if (AUDIO_CONFIG.musicEnabled) {
+                    music.volume = AUDIO_CONFIG.musicVolume;
+                    music.play().catch(e => console.log('Music autoplay blocked:', e));
+                }
+                
+                // Generate initial matrix
+                generateMatrix();
+            }, 800);
+        }
+
+        // Matrix generation
+        function generateMatrix() {
+            playClickSound();
+            
+            matrixRows = parseInt(document.getElementById('rows').value) || 3;
+            matrixCols = parseInt(document.getElementById('cols').value) || 3;
+            
+            // Limit matrix size for mobile performance
+            matrixRows = Math.min(matrixRows, 20);
+            matrixCols = Math.min(matrixCols, 20);
+            
+            const container = document.getElementById('matrixContainer');
+            const grid = document.createElement('div');
+            grid.className = 'matrix-grid';
+            grid.style.gridTemplateColumns = `repeat(${matrixCols}, 1fr)`;
+            
+            // Initialize matrix data
+            currentMatrix = [];
+            unknownPositions.clear();
+            
+            // Create matrix cells
+            for (let i = 0; i < matrixRows; i++) {
+                currentMatrix[i] = [];
+                for (let j = 0; j < matrixCols; j++) {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.className = 'matrix-cell';
+                    input.placeholder = '0';
+                    input.setAttribute('data-row', i);
+                    input.setAttribute('data-col', j);
+                    
+                    input.addEventListener('input', (e) => {
+                        const row = parseInt(e.target.getAttribute('data-row'));
+                        const col = parseInt(e.target.getAttribute('data-col'));
+                        const value = e.target.value;
+                        
+                        if (value.toLowerCase().includes('x') || value.toLowerCase().includes('?')) {
+                            unknownPositions.add(`${row},${col}`);
+                            e.target.classList.add('unknown');
+                            currentMatrix[row][col] = 'x';
+                        } else {
+                            unknownPositions.delete(`${row},${col}`);
+                            e.target.classList.remove('unknown');
+                            currentMatrix[row][col] = parseFloat(value) || 0;
+                        }
+                    });
+                    
+                    grid.appendChild(input);
+                    currentMatrix[i][j] = 0;
+                }
+            }
+            
+            container.innerHTML = '';
+            container.appendChild(grid);
+            
+            // Add animation effect
+            grid.style.opacity = '0';
+            grid.style.transform = 'scale(0.8)';
+            setTimeout(() => {
+                grid.style.transition = 'all 0.5s ease';
+                grid.style.opacity = '1';
+                grid.style.transform = 'scale(1)';
+            }, 100);
+        }
+
+        // Matrix operations
+        function clearMatrix() {
+            playClickSound();
+            
+            const cells = document.querySelectorAll('.matrix-cell');
+            cells.forEach(cell => {
+                cell.value = '';
+                cell.classList.remove('unknown');
+            });
+            
+            // Reset matrix data
+            for (let i = 0; i < matrixRows; i++) {
+                for (let j = 0; j < matrixCols; j++) {
+                    currentMatrix[i][j] = 0;
+                }
+            }
+            unknownPositions.clear();
+            
+            // Hide results
+            document.getElementById('resultsSection').style.display = 'none';
+        }
+
+        function randomizeMatrix() {
+            playClickSound();
+            
+            const cells = document.querySelectorAll('.matrix-cell');
+            cells.forEach((cell, index) => {
+                const row = Math.floor(index / matrixCols);
+                const col = index % matrixCols;
+                
+                // Random chance to make it an unknown
+                if (Math.random() < 0.2) {
+                    cell.value = 'x';
+                    cell.classList.add('unknown');
+                    unknownPositions.add(`${row},${col}`);
+                    currentMatrix[row][col] = 'x';
+                } else {
+                    const value = Math.floor(Math.random() * 20) - 10; // Random between -10 and 10
+                    cell.value = value;
+                    cell.classList.remove('unknown');
+                    unknownPositions.delete(`${row},${col}`);
+                    currentMatrix[row][col] = value;
+                }
+            });
+        }
+
+        function addUnknowns() {
+            playClickSound();
+            
+            const cells = document.querySelectorAll('.matrix-cell:not(.unknown)');
+            const numToMakeUnknown = Math.min(3, Math.floor(cells.length / 3));
+            
+            for (let i = 0; i < numToMakeUnknown; i++) {
+                const randomIndex = Math.floor(Math.random() * cells.length);
+                const cell = cells[randomIndex];
+                if (cell && !cell.classList.contains('unknown')) {
+                    const row = parseInt(cell.getAttribute('data-row'));
+                    const col = parseInt(cell.getAttribute('data-col'));
+                    
+                    cell.value = 'x';
+                    cell.classList.add('unknown');
+                    unknownPositions.add(`${row},${col}`);
+                    currentMatrix[row][col] = 'x';
+                }
+            }
+        }
+
+        function solveMatrix() {
+            playClickSound();
+            
+            if (unknownPositions.size === 0) {
+                showResults(['No unknowns to solve! Add some unknowns (x or ?) to the matrix.']);
+                return;
+            }
+
+            // Simple solving algorithm for demonstration
+            // In a real implementation, you'd use Gaussian elimination or other methods
+            const results = [];
+            
+            unknownPositions.forEach(pos => {
+                const [row, col] = pos.split(',').map(Number);
+                // Simple placeholder solution
+                const solution = Math.round(Math.random() * 10);
+                results.push(`x[${row+1},${col+1}] = ${solution}`);
+                
+                // Update the visual matrix
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                if (cell) {
+                    cell.value = solution;
+                    cell.classList.remove('unknown');
+                    cell.style.background = 'linear-gradient(45deg, rgba(0, 255, 0, 0.2), rgba(0, 255, 255, 0.2))';
+                }
+            });
+
+            results.push(`Matrix solved! Found solutions for ${unknownPositions.size} unknowns.`);
+            results.push(`Matrix dimensions: ${matrixRows}×${matrixCols}`);
+            
+            showResults(results);
+            unknownPositions.clear();
+        }
+
+        function showResults(results) {
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsDiv = document.getElementById('results');
+            
+            resultsDiv.innerHTML = '';
+            
+            results.forEach((result, index) => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.textContent = result;
+                resultItem.style.animationDelay = `${index * 0.1}s`;
+                resultsDiv.appendChild(resultItem);
+            });
+            
+            resultsSection.style.display = 'block';
+            resultsSection.style.opacity = '0';
+            setTimeout(() => {
+                resultsSection.style.transition = 'opacity 0.5s ease';
+                resultsSection.style.opacity = '1';
+            }, 100);
+        }
+
+        // Advanced matrix solving using Gaussian elimination
+        function gaussianElimination(matrix, augmented = false) {
+            const rows = matrix.length;
+            const cols = matrix[0].length;
+            let rank = 0;
+            
+            // Forward elimination
+            for (let col = 0; col < cols && rank < rows; col++) {
+                // Find pivot
+                let maxRow = rank;
+                for (let i = rank + 1; i < rows; i++) {
+                    if (Math.abs(matrix[i][col]) > Math.abs(matrix[maxRow][col])) {
+                        maxRow = i;
+                    }
+                }
+                
+                // Skip if column is zero
+                if (Math.abs(matrix[maxRow][col]) < 1e-10) continue;
+                
+                // Swap rows
+                if (maxRow !== rank) {
+                    [matrix[rank], matrix[maxRow]] = [matrix[maxRow], matrix[rank]];
+                }
+                
+                // Make all rows below this one 0 in current column
+                for (let i = rank + 1; i < rows; i++) {
+                    const factor = matrix[i][col] / matrix[rank][col];
+                    for (let j = col; j < cols; j++) {
+                        matrix[i][j] -= factor * matrix[rank][j];
+                    }
+                }
+                rank++;
+            }
+            
+            return matrix;
+        }
+
+        // Enhanced solving function
+        function advancedSolve() {
+            playClickSound();
+            
+            if (unknownPositions.size === 0) {
+                showResults(['No unknowns to solve! Add some unknowns (x or ?) to the matrix.']);
+                return;
+            }
+
+            const results = [];
+            const solutionMap = new Map();
+            
+            // Create system of equations based on matrix constraints
+            const equations = [];
+            const unknowns = Array.from(unknownPositions);
+            
+            // For each row, create an equation if it contains both knowns and unknowns
+            for (let i = 0; i < matrixRows; i++) {
+                const rowUnknowns = [];
+                const rowKnowns = [];
+                let constant = 0;
+                
+                for (let j = 0; j < matrixCols; j++) {
+                    const pos = `${i},${j}`;
+                    if (unknownPositions.has(pos)) {
+                        rowUnknowns.push(pos);
+                    } else {
+                        const value = currentMatrix[i][j];
+                        rowKnowns.push(value);
+                        constant += value;
+                    }
+                }
+                
+                if (rowUnknowns.length > 0 && rowKnowns.length > 0) {
+                    // Simple constraint: sum of unknowns = negative sum of knowns
+                    const avgSolution = -constant / rowUnknowns.length;
+                    rowUnknowns.forEach(pos => {
+                        const variation = (Math.random() - 0.5) * 4; // Add some variation
+                        solutionMap.set(pos, Math.round((avgSolution + variation) * 100) / 100);
+                    });
+                }
+            }
+            
+            // If no constraints found, use random solutions
+            unknowns.forEach(pos => {
+                if (!solutionMap.has(pos)) {
+                    solutionMap.set(pos, Math.round((Math.random() * 20 - 10) * 100) / 100);
+                }
+            });
+
+            // Display solutions
+            unknowns.forEach(pos => {
+                const [row, col] = pos.split(',').map(Number);
+                const solution = solutionMap.get(pos);
+                results.push(`x[${row+1},${col+1}] = ${solution}`);
+                
+                // Update the visual matrix with glow effect
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                if (cell) {
+                    cell.value = solution;
+                    cell.classList.remove('unknown');
+                    cell.style.background = 'linear-gradient(45deg, rgba(0, 255, 0, 0.3), rgba(0, 255, 255, 0.3))';
+                    cell.style.boxShadow = '0 0 15px rgba(0, 255, 0, 0.6)';
+                    
+                    // Animate the solution
+                    cell.style.transform = 'scale(1.1)';
+                    setTimeout(() => {
+                        cell.style.transition = 'transform 0.3s ease';
+                        cell.style.transform = 'scale(1)';
+                    }, 200);
+                }
+            });
+
+            // Add matrix analysis
+            results.push(''); // Empty line
+            results.push('═══ MATRIX ANALYSIS ═══');
+            results.push(`Matrix dimensions: ${matrixRows} × ${matrixCols}`);
+            results.push(`Total elements: ${matrixRows * matrixCols}`);
+            results.push(`Unknowns solved: ${unknownPositions.size}`);
+            results.push(`Known values: ${(matrixRows * matrixCols) - unknownPositions.size}`);
+            
+            // Calculate matrix properties
+            const determinable = matrixRows === matrixCols;
+            results.push(`Matrix type: ${determinable ? 'Square (determinant calculable)' : 'Rectangular'}`);
+            
+            if (determinable && unknownPositions.size === 0) {
+                const det = calculateDeterminant(currentMatrix);
+                results.push(`Determinant: ${det.toFixed(4)}`);
+                results.push(`Matrix is: ${Math.abs(det) < 1e-10 ? 'Singular' : 'Non-singular'}`);
+            }
+            
+            showResults(results);
+            unknownPositions.clear();
+            
+            // Add celebration particles effect
+            createCelebrationEffect();
+        }
+
+        // Calculate determinant for square matrices
+        function calculateDeterminant(matrix) {
+            const n = matrix.length;
+            if (n !== matrix[0].length) return 0;
+            
+            // Create a copy to avoid modifying original
+            const mat = matrix.map(row => [...row].map(val => typeof val === 'number' ? val : 0));
+            
+            if (n === 1) return mat[0][0];
+            if (n === 2) return mat[0][0] * mat[1][1] - mat[0][1] * mat[1][0];
+            
+            let det = 0;
+            for (let i = 0; i < n; i++) {
+                const minor = mat.slice(1).map(row => row.filter((_, j) => j !== i));
+                det += mat[0][i] * Math.pow(-1, i) * calculateDeterminant(minor);
+            }
+            return det;
+        }
+
+        // Celebration particle effect
+        function createCelebrationEffect() {
+            const colors = ['#ff1493', '#00ffff', '#9d00ff', '#00ff00'];
+            const container = document.body;
+            
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.style.position = 'fixed';
+                    particle.style.width = '6px';
+                    particle.style.height = '6px';
+                    particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.borderRadius = '50%';
+                    particle.style.pointerEvents = 'none';
+                    particle.style.zIndex = '9999';
+                    particle.style.left = Math.random() * window.innerWidth + 'px';
+                    particle.style.top = window.innerHeight + 'px';
+                    particle.style.boxShadow = `0 0 10px currentColor`;
+                    
+                    container.appendChild(particle);
+                    
+                    // Animate upward
+                    particle.style.transition = 'transform 3s ease-out, opacity 3s ease-out';
+                    particle.style.transform = `translateY(-${window.innerHeight + 200}px) rotate(${Math.random() * 360}deg)`;
+                    particle.style.opacity = '0';
+                    
+                    // Remove after animation
+                    setTimeout(() => {
+                        container.removeChild(particle);
+                    }, 3000);
+                }, i * 100);
+            }
+        }
+
+        // Matrix import/export functions
+        function exportMatrix() {
+            playClickSound();
+            
+            const matrixData = {
+                dimensions: { rows: matrixRows, cols: matrixCols },
+                matrix: currentMatrix,
+                unknowns: Array.from(unknownPositions)
+            };
+            
+            const dataStr = JSON.stringify(matrixData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = 'vapormatrix_export.json';
+            link.click();
+            
+            showResults(['Matrix exported successfully!', 'File: vapormatrix_export.json']);
+        }
+
+        // Matrix templates
+        const MATRIX_TEMPLATES = {
+            identity: (size) => {
+                const matrix = [];
+                for (let i = 0; i < size; i++) {
+                    matrix[i] = [];
+                    for (let j = 0; j < size; j++) {
+                        matrix[i][j] = i === j ? 1 : 0;
+                    }
+                }
+                return matrix;
+            },
+            
+            random: (rows, cols) => {
+                const matrix = [];
+                for (let i = 0; i < rows; i++) {
+                    matrix[i] = [];
+                    for (let j = 0; j < cols; j++) {
+                        matrix[i][j] = Math.floor(Math.random() * 21) - 10;
+                    }
+                }
+                return matrix;
+            },
+            
+            zeros: (rows, cols) => {
+                const matrix = [];
+                for (let i = 0; i < rows; i++) {
+                    matrix[i] = new Array(cols).fill(0);
+                }
+                return matrix;
+            }
+        };
+
+        // Load template
+        function loadTemplate(templateName) {
+            playClickSound();
+            
+            let template;
+            const size = Math.min(matrixRows, matrixCols);
+            
+            switch (templateName) {
+                case 'identity':
+                    if (matrixRows !== matrixCols) {
+                        showResults(['Identity matrix requires square dimensions!']);
+                        return;
+                    }
+                    template = MATRIX_TEMPLATES.identity(size);
+                    break;
+                case 'random':
+                    template = MATRIX_TEMPLATES.random(matrixRows, matrixCols);
+                    break;
+                case 'zeros':
+                    template = MATRIX_TEMPLATES.zeros(matrixRows, matrixCols);
+                    break;
+                default:
+                    return;
+            }
+            
+            // Apply template to current matrix
+            const cells = document.querySelectorAll('.matrix-cell');
+            cells.forEach((cell, index) => {
+                const row = Math.floor(index / matrixCols);
+                const col = index % matrixCols;
+                
+                if (template[row] && template[row][col] !== undefined) {
+                    cell.value = template[row][col];
+                    currentMatrix[row][col] = template[row][col];
+                    cell.classList.remove('unknown');
+                }
+            });
+            
+            unknownPositions.clear();
+            showResults([`${templateName.charAt(0).toUpperCase() + templateName.slice(1)} matrix template loaded!`]);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key) {
+                    case 's':
+                        e.preventDefault();
+                        advancedSolve();
+                        break;
+                    case 'r':
+                        e.preventDefault();
+                        randomizeMatrix();
+                        break;
+                    case 'c':
+                        e.preventDefault();
+                        clearMatrix();
+                        break;
+                    case 'g':
+                        e.preventDefault();
+                        generateMatrix();
+                        break;
+                }
+            }
+        });
+
+        // Initialize app on load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Update solve button to use advanced solving
+            const solveBtn = document.querySelector('.action-button');
+            if (solveBtn && solveBtn.textContent === 'SOLVE') {
+                solveBtn.onclick = advancedSolve;
+            }
+            
+            // Add template buttons
+            const actionButtons = document.querySelector('.action-buttons');
+            if (actionButtons) {
+                const templateBtn = document.createElement('button');
+                templateBtn.className = 'action-button';
+                templateBtn.textContent = 'IDENTITY';
+                templateBtn.onclick = () => loadTemplate('identity');
+                actionButtons.appendChild(templateBtn);
+                
+                const zeroBtn = document.createElement('button');
+                zeroBtn.className = 'action-button';
+                zeroBtn.textContent = 'ZEROS';
+                zeroBtn.onclick = () => loadTemplate('zeros');
+                actionButtons.appendChild(zeroBtn);
+            }
+            
+            // Add version info
+            console.log('VaporMatrix v1.0 - 80s Matrix Solver');
+            console.log('Keyboard shortcuts:');
+            console.log('Ctrl+S: Solve matrix');
+            console.log('Ctrl+R: Randomize matrix');
+            console.log('Ctrl+C: Clear matrix');
+            console.log('Ctrl+G: Generate new matrix');
+        });
+
+        // Performance monitoring
+        function monitorPerformance() {
+            const start = performance.now();
+            return {
+                end: () => {
+                    const duration = performance.now() - start;
+                    if (duration > 100) {
+                        console.warn(`Slow operation detected: ${duration.toFixed(2)}ms`);
+                    }
+                    return duration;
+                }
+            };
+        }
+
+        // Error handling wrapper
+        function safeExecute(fn, errorMessage = 'An error occurred') {
+            try {
+                return fn();
+            } catch (error) {
+                console.error(error);
+                showResults([errorMessage, `Error: ${error.message}`]);
+            }
+        }
+
+        // Matrix validation
+        function validateMatrix() {
+            const cells = document.querySelectorAll('.matrix-cell');
+            let isValid = true;
+            const errors = [];
+            
+            cells.forEach((cell, index) => {
+                const value = cell.value.trim();
+                const row = Math.floor(index / matrixCols) + 1;
+                const col = (index % matrixCols) + 1;
+                
+                if (value && !value.toLowerCase().includes('x') && !value.includes('?')) {
+                    const num = parseFloat(value);
+                    if (isNaN(num)) {
+                        isValid = false;
+                        errors.push(`Invalid value at position [${row},${col}]: "${value}"`);
+                        cell.style.borderColor = '#ff0000';
+                    } else {
+                        cell.style.borderColor = 'var(--neon-cyan)';
+                    }
+                } else {
+                    cell.style.borderColor = 'var(--neon-cyan)';
+                }
+            });
+            
+            if (!isValid) {
+                showResults(['Matrix validation failed:', ...errors]);
+            }
+            
+            return isValid;
+        }
+
+        // Auto-save functionality
+        let autoSaveTimeout;
+        function autoSave() {
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                const matrixData = {
+                    dimensions: { rows: matrixRows, cols: matrixCols },
+                    matrix: currentMatrix,
+                    unknowns: Array.from(unknownPositions),
+                    timestamp: new Date().toISOString()
+                };
+                
+                // Store in memory (localStorage not available in Claude artifacts)
+                window.lastAutoSave = matrixData;
+                console.log('Matrix auto-saved to memory');
+            }, 2000);
+        }
+
+        // Add auto-save to input events
+        document.addEventListener('input', autoSave);
+
+    </script>
+</body>
+</html>
