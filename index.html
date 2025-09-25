@@ -6,6 +6,8 @@
     <title>VaporMatrix - 80s Matrix Solver</title>
     <style>
         /* === CUSTOMIZABLE ASSETS === */
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;700&family=Rajdhani:wght@300;400;600;700&display=swap');
+        
         :root {
             /* Colors */
             --primary-bg: linear-gradient(135deg, #1a0033 0%, #330066 50%, #004d99 100%);
@@ -19,9 +21,10 @@
             --button-bg: linear-gradient(45deg, #ff1493, #9d00ff);
             --grid-border: #00ffff;
             
-            /* Fonts */
-            --main-font: 'Courier New', monospace;
-            --title-font: 'Courier New', monospace;
+            /* Fonts - CUSTOMIZABLE: Replace with your preferred fonts */
+            --main-font: 'Exo 2', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --title-font: 'Orbitron', 'Courier New', monospace;
+            --accent-font: 'Rajdhani', 'Arial Black', sans-serif;
             --font-size-small: 12px;
             --font-size-medium: 16px;
             --font-size-large: 24px;
@@ -112,8 +115,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            font-family: var(--title-font);
+            font-weight: 900;
             font-size: var(--font-size-xl);
-            font-weight: bold;
             color: white;
             text-shadow: 0 0 20px currentColor;
             animation: neonPulse var(--pulse-speed) ease-in-out infinite alternate;
@@ -141,6 +145,8 @@
         }
 
         .team-names h2 {
+            font-family: var(--title-font);
+            font-weight: 700;
             font-size: var(--font-size-large);
             color: var(--neon-cyan);
             margin-bottom: 20px;
@@ -151,17 +157,25 @@
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
-            max-width: 300px;
+            max-width: 320px;
+            margin: 0 auto;
+            padding: 0 10px;
         }
 
         .name-item {
-            padding: 8px;
+            padding: 8px 12px;
             background: var(--input-bg);
             border: 1px solid var(--neon-pink);
             border-radius: 5px;
             text-align: center;
+            font-family: var(--accent-font);
+            font-weight: 600;
             font-size: var(--font-size-small);
             animation: nameGlow var(--glow-animation-speed) ease-in-out infinite alternate;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 35px;
         }
 
         @keyframes nameGlow {
@@ -175,8 +189,9 @@
             border: none;
             border-radius: 25px;
             color: white;
+            font-family: var(--title-font);
+            font-weight: 700;
             font-size: var(--font-size-medium);
-            font-family: var(--main-font);
             cursor: pointer;
             box-shadow: 0 0 20px var(--neon-pink);
             transition: all 0.3s ease;
@@ -202,6 +217,8 @@
         }
 
         .app-title {
+            font-family: var(--title-font);
+            font-weight: 900;
             font-size: var(--font-size-xl);
             color: var(--neon-cyan);
             text-shadow: 0 0 20px currentColor;
@@ -215,6 +232,8 @@
         }
 
         .app-subtitle {
+            font-family: var(--accent-font);
+            font-weight: 600;
             font-size: var(--font-size-medium);
             color: var(--neon-pink);
             text-shadow: 0 0 10px currentColor;
@@ -422,7 +441,7 @@
         }
 
         /* Responsive Design */
-        @media (max-width: 480px) {
+            @media (max-width: 480px) {
             .dimension-inputs {
                 flex-direction: column;
             }
@@ -441,7 +460,12 @@
             
             .names-grid {
                 grid-template-columns: 1fr;
-                max-width: 200px;
+                max-width: 280px;
+            }
+            
+            .name-item {
+                font-size: 11px;
+                padding: 6px 10px;
             }
         }
 
@@ -462,15 +486,26 @@
     <div class="bg-animation"></div>
     <div class="grid-overlay"></div>
 
-    <!-- Audio Elements (CUSTOMIZABLE ASSETS) -->
+    <!-- Audio Elements (CUSTOMIZABLE ASSETS - Replace with your files) -->
     <audio id="bgMusic" loop>
-        <!-- Replace with your vaporwave music file -->
-        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmgfDzJ+y+8=" type="audio/wav">
+        <!-- PLACEHOLDER: Replace "bgm.mp3" with your vaporwave background music -->
+        <source src="bgm.mp3" type="audio/mpeg">
+        <source src="bgm.ogg" type="audio/ogg">
+        <source src="bgm.wav" type="audio/wav">
     </audio>
     
     <audio id="clickSound">
-        <!-- Replace with your click sound effect -->
-        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmgfDzJ+y+8=" type="audio/wav">
+        <!-- PLACEHOLDER: Replace "click_sound.mp3" with your click sound effect -->
+        <source src="click_sound.mp3" type="audio/mpeg">
+        <source src="click_sound.ogg" type="audio/ogg">
+        <source src="click_sound.wav" type="audio/wav">
+    </audio>
+    
+    <audio id="solveSound">
+        <!-- PLACEHOLDER: Replace "solve_sound.mp3" with your solve completion sound -->
+        <source src="solve_sound.mp3" type="audio/mpeg">
+        <source src="solve_sound.ogg" type="audio/ogg">
+        <source src="solve_sound.wav" type="audio/wav">
     </audio>
 
     <!-- Splash Screen -->
@@ -482,17 +517,17 @@
         <div class="team-names">
             <h2>VAPOR MATRIX TEAM</h2>
             <div class="names-grid">
-                <!-- CUSTOMIZABLE TEAM NAMES -->
-                <div class="name-item">Alex Neon</div>
-                <div class="name-item">Cyber Sarah</div>
-                <div class="name-item">Max Synth</div>
-                <div class="name-item">Luna Wave</div>
-                <div class="name-item">Neo Blake</div>
-                <div class="name-item">Zara Grid</div>
-                <div class="name-item">Kai Pulse</div>
-                <div class="name-item">Nova Code</div>
-                <div class="name-item">Jax Matrix</div>
-                <div class="name-item">Ava Retro</div>
+                <!-- CUSTOMIZABLE TEAM NAMES - Replace with your team members -->
+                <div class="name-item">Carl Castro</div>
+                <div class="name-item">Shernan Alejo</div>
+                <div class="name-item">Eran Castillon</div>
+                <div class="name-item">David Dimain</div>
+                <div class="name-item">Bin Dompol</div>
+                <div class="name-item">Hervy Lutero</div>
+                <div class="name-item">Jasper Hasim</div>
+                <div class="name-item">Jayden Denoyo</div>
+                <div class="name-item">Keeno Valmores</div>
+                <div class="name-item">Youshrie Marallahi</div>
             </div>
         </div>
         
@@ -604,6 +639,15 @@
         function playClickSound() {
             if (AUDIO_CONFIG.soundsEnabled) {
                 const sound = document.getElementById('clickSound');
+                sound.currentTime = 0;
+                sound.volume = AUDIO_CONFIG.soundVolume;
+                sound.play().catch(e => console.log('Audio play failed:', e));
+            }
+        }
+
+        function playSolveSound() {
+            if (AUDIO_CONFIG.soundsEnabled) {
+                const sound = document.getElementById('solveSound');
                 sound.currentTime = 0;
                 sound.volume = AUDIO_CONFIG.soundVolume;
                 sound.play().catch(e => console.log('Audio play failed:', e));
@@ -955,7 +999,8 @@
             showResults(results);
             unknownPositions.clear();
             
-            // Add celebration particles effect
+            // Play solve sound and add celebration particles effect
+            playSolveSound();
             createCelebrationEffect();
         }
 
