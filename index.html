@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ConnectTa – Emergency Mesh Communicator</title>
+  <!-- Link the site’s manifest for PWA installation -->
+  <link rel="manifest" href="manifest.json" />
+  <!-- Link to the app’s stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+  <!-- Include Leaflet CSS for map rendering -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+    integrity="sha256-VomtGHjvC6Dx5T9yoBnKk1npZ2ZzG4pWoFN2iAPu2+M="
+    crossorigin=""
+  />
+  <!-- Include icons for Apple devices -->
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <meta name="theme-color" content="#0C012D" />
+</head>
+<body>
+  <!-- Top navigation / status bar -->
+  <header class="app-header">
+    <h1>ConnectTa</h1>
+    <div id="status-bar">
+      <span id="connection-status">Not connected</span>
+      <span id="battery-level"></span>
+    </div>
+  </header>
+
+  <!-- Connection controls -->
+  <section class="connection-controls">
+    <button id="connect-serial" class="btn">Connect via USB</button>
+    <button id="connect-bluetooth" class="btn">Connect via Bluetooth</button>
+    <button id="connect-wifi" class="btn">Connect via Wi‑Fi</button>
+  </section>
+
+  <!-- Emergency buttons -->
+  <section class="emergency-controls">
+    <button id="sos-btn" class="btn-emergency sos">SOS</button>
+    <button id="medical-btn" class="btn-emergency medical">Medical</button>
+    <button id="lost-btn" class="btn-emergency lost">Lost/Rescue</button>
+    <button id="disaster-btn" class="btn-emergency disaster">Disaster</button>
+  </section>
+
+  <!-- Main content area -->
+  <main class="main-container">
+    <!-- Map container -->
+    <div id="map" class="map"></div>
+
+    <!-- Messaging panel -->
+    <div class="message-panel">
+      <div id="messages" class="messages"></div>
+      <form id="message-form" class="message-form">
+        <input
+          type="text"
+          id="message-input"
+          placeholder="Type a message..."
+          aria-label="Message text"
+          required
+        />
+        <button type="submit" class="btn send-btn">Send</button>
+      </form>
+    </div>
+  </main>
+
+  <!-- Load Leaflet JS for the map -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+    integrity="sha256-Dtm8J4Vpy3pYvO78j0Xm9CdCbU1OcUNAZ5Q5u7M5Qm0="
+    crossorigin=""
+  ></script>
+  <!-- Register the service worker and initialize the app -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>
