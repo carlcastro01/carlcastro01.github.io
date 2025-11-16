@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#030015" />
+  <title>ConnectTa — Meshtastic Emergency Web Client</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <!-- Leaflet CSS (CDN). You can vendor this into /vendor/leaflet/ for full offline use. -->
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <link rel="stylesheet" href="styles.css" />
+  <meta name="description" content="Disaster-resilient emergency web client for Meshtastic networks. Web Serial, Web Bluetooth, and WiFi/HTTP; offline-first PWA." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="color-scheme" content="dark only">
+  <!-- Import maps: map @meshtastic/js to your local /packages path or a CDN. -->
+  <script type="importmap">
+  {
+    "imports": {
+      "@meshtastic/js": "/packages/js/index.js",
+      "leaflet": "https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet-src.esm.js",
+      "dexie": "https://cdn.jsdelivr.net/npm/dexie@4.0.8/dist/dexie.mjs",
+      "leaflet-mbtiles": "/vendor/leaflet-tilelayer-mbtiles-ts/index.js",
+      "sql.js": "/vendor/sql.js/sql-wasm.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <header class="appbar">
+    <div class="brand">
+      <img src="icons/icon-192.png" alt="" class="brand__icon" />
+      <h1>ConnectTa</h1>
+    </div>
+    <div class="status">
+      <span id="connStatus" class="pill pill--disconnected">Disconnected</span>
+      <span id="battery" class="battery" title="Battery">--%</span>
+    </div>
+  </header>
+
+  <main class="grid">
+    <!-- Connection card -->
+    <section class="card">
+      <h2>Connect to Device</h2>
+      <div class="connect-row">
+        <label class="sr-only" for="connectMethod">Method</label>
+        <select id="connectMethod">
+          <option value="serial">Web Serial (USB)</option>
+          <option value="ble">Web Bluetooth</option>
+          <option value="http">WiFi / HTTP</option>
+        </select>
+        <input type="text" id="ipAddress" placeholder="Device IP (e.g., 192.168.4.1)" inputmode="decimal" />
+        <button id="btnConnect" class="btn btn--primary">Connect</button>
+        <button id="btnDisconnect" class="btn btn--ghost">Disconnect</button>
+      </div>
+      <div class="row">
+        <button id="btnScanNodes" class="btn btn--outline">Refresh Nodes</button>
+        <button id="btnBlink" class="btn btn--outline">Blink LED</button>
+        <button id="btnRestart" class="btn btn--danger">Restart Device</button>
+      </div>
+    </section>
+
+    <!-- Emergency actions -->
+    <section class="card card--sos">
+      <h2>Emergency</h2>
+      <div class="sos-grid">
+        <button class="sos sos--primary" data-type="SOS" id="btnSOS">
+          <span class="sos__title">SOS</span>
+          <span class="sos__desc">Broadcast to all</span>
+        </button>
+        <button class="sos" data-type="MEDICAL">
+          <span class="sos__title">Medical</span>
+          <span class="sos__desc">Urgent assistance</span>
+        </button>
+        <button class="sos" data-type="RESCUE">
+          <span class="sos__title">Lost/Rescue</span>
+          <span class="sos__desc">Share position</span>
+        </button>
+        <button class="sos" data-type="DISASTER">
+          <span class="sos__title">Disaster</span>
+          <span class="sos__desc">Hazard alert</span>
+        </button>
+      </div>
+      <div class="row">
+        <label class="toggle"><input type="checkbox" id="includeGPS" checked /> Include GPS</label>
+        <label class="toggle"><input type="checkbox" id="highPriority" checked /> Request ACK</label>
+      </div>
+    </section>
+
+    <!-- Messaging -->
+    <section class="card">
+      <h2>Messaging</h2>
+      <div class="row">
+        <input id="destNode" type="text" placeholder="Destination (node ID or 'broadcast')" />
+        <select id="channel">
+          <option value="0">Channel 0</option>
+          <option value="1">Channel 1</option>
+          <option value="2">Channel 2</option>
+        </select>
+      </div>
+      <textarea id="message" rows="3" placeholder="Type message…"></textarea>
+      <div class="row">
+        <button id="btnSend" class="btn btn--primary">Send</button>
+        <button id="btnSaveDraft" class="btn btn--ghost">Save Offline</button>
+      </div>
+      <div id="thread" class="thread" aria-live="polite"></div>
+    </section>
+
+    <!-- Map -->
+    <section class="card">
+      <h2>Map</h2>
+      <div class="row">
+        <button id="btnGPS" class="btn btn--outline">Share My GPS</button>
+        <button id="btnBreadcrumb" class="btn btn--outline">Start Breadcrumb</button>
+        <label class="file">
+          <input type="file" id="mbtilesFile" accept=".mbtiles" />
+          <span>Load offline .mbtiles</span>
+        </label>
+      </div>
+      <div id="map" class="map"></div>
+      <div id="distance" class="distance"></div>
+    </section>
+
+
+    <!-- Configuration -->
+    <section class="card">
+      <h2>Configuration</h2>
+      <div class="row">
+        <button id="btnGetStats" class="btn btn--outline">Get Statistics</button>
+        <button id="btnGetNetworks" class="btn btn--outline">Get Networks</button>
+        <button id="btnGetSPIFFS" class="btn btn--outline">List SPIFFS</button>
+      </div>
+      <pre id="configOut" style="white-space:pre-wrap; background:#0a072a; padding:.75rem; border-radius:8px; border:1px solid rgba(255,255,255,.08); max-height:30vh; overflow:auto"></pre>
+    </section>
+
+    <!-- Nodes list -->
+    <section class="card">
+      <h2>Nodes</h2>
+      <ul id="nodes" class="nodes"></ul>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span>ConnectTa ©</span>
+    <span>Offline-ready PWA</span>
+  </footer>
+
+  <script type="module" src="app/main.js"></script>
+</body>
+</html>

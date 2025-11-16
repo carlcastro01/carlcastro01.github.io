@@ -1,0 +1,32 @@
+{
+  "name": "ConnectTa \u2014 Meshtastic Emergency Web Client",
+  "short_name": "ConnectTa",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#0C012D",
+  "theme_color": "#030015",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
