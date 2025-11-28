@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MUJER - Women's Safety SOS Device</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        :root {
+            --blush-pink: #F8BBD0;
+            --baby-pink: #FFD1DC;
+            --pale-peach: #FFE5EC;
+            --denim-blue: #5DADE2;
+            --deep-denim: #274690;
+            --dark-violet: #8E44AD;
+            --lavender: #B388EB;
+            --gold-accent: #D4AF37;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #FFE5EC 0%, #F8BBD0 50%, #E8F4FD 100%);
+            background-attachment: fixed;
+        }
+        
+        .denim-texture {
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(93, 173, 226, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(93, 173, 226, 0.06) 0%, transparent 40%),
+                radial-gradient(circle at 40% 80%, rgba(179, 136, 235, 0.05) 0%, transparent 45%);
+        }
+        
+        .title-mujer {
+            font-family: 'Playfair Display', serif;
+            color: var(--dark-violet);
+            text-shadow: 
+                -2px -2px 0 #fff,
+                2px -2px 0 #fff,
+                -2px 2px 0 #fff,
+                2px 2px 0 #fff,
+                0 0 20px rgba(142, 68, 173, 0.3);
+        }
+        
+        .btn-sos {
+            background: linear-gradient(145deg, var(--denim-blue), var(--deep-denim));
+            box-shadow: 
+                0 8px 30px rgba(39, 70, 144, 0.4),
+                inset 0 2px 10px rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-sos:hover {
+            transform: scale(1.05);
+            box-shadow: 
+                0 12px 40px rgba(39, 70, 144, 0.5),
+                inset 0 2px 10px rgba(255, 255, 255, 0.3);
+        }
+        
+        .btn-sos.active {
+            animation: pulse-sos 1.5s infinite;
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+        }
+        
+        @keyframes pulse-sos {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+            }
+            50% { 
+                transform: scale(1.05);
+                box-shadow: 0 0 0 20px rgba(231, 76, 60, 0);
+            }
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(93, 173, 226, 0.2);
+        }
+        
+        .gold-accent {
+            color: var(--gold-accent);
+        }
+        
+        .btn-gold {
+            background: linear-gradient(145deg, #D4AF37, #B8962E);
+            color: white;
+        }
+        
+        .pink-overlay {
+            background: rgba(248, 187, 208, 0.3);
+            border: 2px solid var(--blush-pink);
+        }
+        
+        #map {
+            height: 400px;
+            border-radius: 1rem;
+            border: 3px solid var(--denim-blue);
+        }
+        
+        .status-indicator {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .nav-link {
+            position: relative;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--deep-denim);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .section-divider {
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--denim-blue), transparent);
+        }
+    </style>
+</head>
+<body class="min-h-screen denim-texture">
+    <!-- Navigation -->
+    <nav class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <h1 class="title-mujer text-3xl md:text-4xl font-bold tracking-wider">MUJER</h1>
+                <div class="flex gap-6 text-sm md:text-base font-medium text-gray-700">
+                    <a href="#about" class="nav-link hover:text-[#274690] transition">About</a>
+                    <a href="#user" class="nav-link hover:text-[#274690] transition">User</a>
+                    <a href="#receiver" class="nav-link hover:text-[#274690] transition">Receiver</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="py-16 md:py-24 px-4">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="title-mujer text-5xl md:text-7xl font-bold mb-6">MUJER</h2>
+            <p class="text-lg md:text-xl text-gray-700 mb-4 font-medium">
+                SCR-Enhanced Bluetooth SOS Alarm Device for Women's Safety
+            </p>
+            <p class="text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                An innovative safety system designed for crowded environments. When triggered, 
+                MUJER collects GPS locations and sends alerts every 10 minutes until manually deactivated, 
+                keeping you connected and protected.
+            </p>
+            <div class="mt-8 flex justify-center gap-4 flex-wrap">
+                <span class="px-4 py-2 rounded-full bg-[#F8BBD0]/50 text-[#8E44AD] font-medium text-sm">
+                    📍 GPS Tracking
+                </span>
+                <span class="px-4 py-2 rounded-full bg-[#5DADE2]/20 text-[#274690] font-medium text-sm">
+                    📶 Bluetooth SOS
+                </span>
+                <span class="px-4 py-2 rounded-full bg-[#B388EB]/30 text-[#8E44AD] font-medium text-sm">
+                    🔔 10-Min Alerts
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <div class="section-divider max-w-5xl mx-auto"></div>
+
+    <!-- About Section -->
+    <section id="about" class="py-16 px-4">
+        <div class="max-w-6xl mx-auto">
+            <h3 class="text-3xl font-bold text-center text-[#8E44AD] mb-12">How It Works</h3>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="card rounded-2xl p-8 text-center hover:shadow-xl transition-shadow">
+                    <div class="w-16 h-16 bg-[#FFD1DC] rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-3xl">📝</span>
+                    </div>
+                    <h4 class="font-bold text-lg text-[#274690] mb-3">Set Your Message</h4>
+                    <p class="text-gray-600 text-sm">Create a predetermined message with your basic info, profile description, and emergency contacts. Update anytime.</p>
+                </div>
+                <div class="card rounded-2xl p-8 text-center hover:shadow-xl transition-shadow">
+                    <div class="w-16 h-16 bg-[#5DADE2]/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-3xl">🆘</span>
+                    </div>
+                    <h4 class="font-bold text-lg text-[#274690] mb-3">Trigger SOS</h4>
+                    <p class="text-gray-600 text-sm">Press the SOS button via Bluetooth device to send your message and GPS location to designated receivers.</p>
+                </div>
+                <div class="card rounded-2xl p-8 text-center hover:shadow-xl transition-shadow">
+                    <div class="w-16 h-16 bg-[#B388EB]/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-3xl">📍</span>
+                    </div>
+                    <h4 class="font-bold text-lg text-[#274690] mb-3">Continuous Tracking</h4>
+                    <p class="text-gray-600 text-sm">Location updates every 10 minutes until you manually turn off the alert. Stay connected with receivers.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider max-w-5xl mx-auto"></div>
+
+    <!-- User Section -->
+    <section id="user" class="py-16 px-4">
+        <div class="max-w-4xl mx-auto">
+            <h3 class="text-3xl font-bold text-center text-[#8E44AD] mb-4">User Panel</h3>
+            <p class="text-center text-gray-600 mb-12">No login required — set your emergency details and you're ready to go</p>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Message Setup -->
+                <div class="card rounded-2xl p-8">
+                    <h4 class="font-bold text-xl text-[#274690] mb-6 flex items-center gap-2">
+                        <span class="gold-accent">✦</span> Emergency Message Setup
+                    </h4>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Your Name</label>
+                            <input type="text" id="userName" placeholder="Enter your full name" 
+                                class="w-full px-4 py-3 rounded-xl border-2 border-[#F8BBD0] focus:border-[#5DADE2] focus:outline-none transition bg-white/70">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Profile Description</label>
+                            <input type="text" id="userDesc" placeholder="e.g., Female, 25 years old, wearing blue jacket" 
+                                class="w-full px-4 py-3 rounded-xl border-2 border-[#F8BBD0] focus:border-[#5DADE2] focus:outline-none transition bg-white/70">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Emergency Contact</label>
+                            <input type="text" id="emergencyContact" placeholder="Contact name and number" 
+                                class="w-full px-4 py-3 rounded-xl border-2 border-[#F8BBD0] focus:border-[#5DADE2] focus:outline-none transition bg-white/70">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Additional Message</label>
+                            <textarea id="additionalMsg" rows="3" placeholder="Any other relevant details..." 
+                                class="w-full px-4 py-3 rounded-xl border-2 border-[#F8BBD0] focus:border-[#5DADE2] focus:outline-none transition bg-white/70 resize-none"></textarea>
+                        </div>
+                        
+                        <button onclick="saveMessage()" 
+                            class="w-full btn-gold py-3 rounded-xl font-semibold hover:opacity-90 transition flex items-center justify-center gap-2">
+                            <span>💾</span> Save Message
+                        </button>
+                        
+                        <p id="saveStatus" class="text-center text-sm text-green-600 hidden">✓ Message saved successfully!</p>
+                    </div>
+                </div>
+                
+                <!-- SOS Button -->
+                <div class="card rounded-2xl p-8 flex flex-col items-center justify-center">
+                    <h4 class="font-bold text-xl text-[#274690] mb-6 flex items-center gap-2">
+                        <span class="gold-accent">✦</span> SOS Alert
+                    </h4>
+                    
+                    <div class="relative mb-6">
+                        <button id="sosButton" onclick="toggleSOS()" 
+                            class="btn-sos w-40 h-40 rounded-full text-white font-bold text-2xl flex flex-col items-center justify-center">
+                            <span class="text-4xl mb-1">🆘</span>
+                            <span id="sosText">PRESS</span>
+                        </button>
+                    </div>
+                    
+                    <div id="sosStatus" class="text-center">
+                        <p class="text-gray-600 text-sm">Press the button to send SOS alert</p>
+                        <p class="text-gray-500 text-xs mt-2">Your message and GPS location will be sent</p>
+                    </div>
+                    
+                    <div id="activeAlert" class="hidden mt-6 p-4 rounded-xl bg-red-50 border-2 border-red-300 w-full">
+                        <div class="flex items-center gap-2 text-red-600 font-semibold mb-2">
+                            <span class="status-indicator">🔴</span> Alert Active
+                        </div>
+                        <p class="text-sm text-red-500">Location updates being sent every 10 minutes</p>
+                        <p class="text-xs text-gray-500 mt-2" id="lastUpdate"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider max-w-5xl mx-auto"></div>
+
+    <!-- Receiver Section -->
+    <section id="receiver" class="py-16 px-4">
+        <div class="max-w-6xl mx-auto">
+            <h3 class="text-3xl font-bold text-center text-[#8E44AD] mb-4">Receiver Dashboard</h3>
+            <p class="text-center text-gray-600 mb-12">Real-time location and profile details of SOS sender</p>
+            
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Sender Profile -->
+                <div class="card rounded-2xl p-6">
+                    <h4 class="font-bold text-lg text-[#274690] mb-6 flex items-center gap-2 border-b-2 border-[#F8BBD0] pb-3">
+                        <span class="gold-accent">✦</span> Sender Profile
+                    </h4>
+                    
+                    <div id="noAlertMsg" class="text-center py-8 text-gray-500">
+                        <span class="text-4xl mb-4 block">👤</span>
+                        <p>No active SOS alert</p>
+                        <p class="text-sm mt-2">Profile will appear when alert is triggered</p>
+                    </div>
+                    
+                    <div id="senderProfile" class="hidden">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-20 h-20 rounded-full bg-gradient-to-br from-[#F8BBD0] to-[#B388EB] flex items-center justify-center text-3xl">
+                                👩
+                            </div>
+                            <div>
+                                <p id="displayName" class="font-bold text-lg text-[#8E44AD]">—</p>
+                                <span class="px-2 py-1 rounded-full bg-red-100 text-red-600 text-xs font-medium status-indicator">
+                                    🔴 SOS Active
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="p-3 rounded-xl bg-[#FFE5EC]/50">
+                                <p class="text-xs text-gray-500 mb-1">Description</p>
+                                <p id="displayDesc" class="text-sm text-gray-700">—</p>
+                            </div>
+                            
+                            <div class="p-3 rounded-xl bg-[#5DADE2]/10">
+                                <p class="text-xs text-gray-500 mb-1">Emergency Contact</p>
+                                <p id="displayContact" class="text-sm text-gray-700 font-medium">—</p>
+                            </div>
+                            
+                            <div class="p-3 rounded-xl bg-[#B388EB]/10">
+                                <p class="text-xs text-gray-500 mb-1">Additional Info</p>
+                                <p id="displayMsg" class="text-sm text-gray-700">—</p>
+                            </div>
+                            
+                            <div class="p-3 rounded-xl bg-white border-2 border-[#5DADE2]">
+                                <p class="text-xs text-gray-500 mb-1">📍 Current Location</p>
+                                <p id="displayLocation" class="text-sm text-[#274690] font-medium">—</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Live Map -->
+                <div class="lg:col-span-2 card rounded-2xl p-6">
+                    <h4 class="font-bold text-lg text-[#274690] mb-4 flex items-center justify-between">
+                        <span class="flex items-center gap-2">
+                            <span class="gold-accent">✦</span> Live Location Map
+                        </span>
+                        <span id="mapStatus" class="text-xs font-normal px-3 py-1 rounded-full bg-gray-100 text-gray-500">
+                            Waiting for alert...
+                        </span>
+                    </h4>
+                    
+                    <div id="map" class="relative">
+                        <div id="mapPlaceholder" class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#FFE5EC] to-[#E8F4FD] rounded-xl z-10">
+                            <div class="text-center text-gray-500">
+                                <span class="text-5xl mb-4 block">🗺️</span>
+                                <p>Map will activate when SOS is triggered</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 flex flex-wrap gap-4 justify-between items-center">
+                        <div class="flex gap-4">
+                            <span class="flex items-center gap-2 text-sm text-gray-600">
+                                <span class="w-3 h-3 rounded-full bg-[#F8BBD0]"></span> SOS Zone
+                            </span>
+                            <span class="flex items-center gap-2 text-sm text-gray-600">
+                                <span class="w-3 h-3 rounded-full bg-red-500"></span> Current Position
+                            </span>
+                        </div>
+                        <p id="lastMapUpdate" class="text-xs text-gray-400">—</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider max-w-5xl mx-auto"></div>
+
+    <!-- Footer -->
+    <footer class="py-12 px-4 bg-[#274690]/10">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="title-mujer text-2xl font-bold mb-4">MUJER</h2>
+            <p class="text-gray-600 mb-6 text-sm">SCR-Enhanced Bluetooth SOS Alarm Device for Women's Safety</p>
+            
+            <div class="card rounded-2xl p-6 mb-6 inline-block">
+                <p class="text-[#8E44AD] font-semibold mb-2">Research Team</p>
+                <p class="text-gray-700">
+                    <span class="font-medium">Researchers:</span> Karelle Lusay, Gian Rebollos, Casey Zaragoza
+                </p>
+                <p class="text-[#5DADE2] font-medium mt-2">Group Number 2</p>
+            </div>
+            
+            <p class="text-gray-500 text-xs mt-6">
+                © 2024 MUJER Research Project. Empowering women's safety through technology.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        let sosActive = false;
+        let map = null;
+        let marker = null;
+        let circle = null;
+        let updateInterval = null;
+
+        // Save user message
+        function saveMessage() {
+            const name = document.getElementById('userName').value;
+            const desc = document.getElementById('userDesc').value;
+            const contact = document.getElementById('emergencyContact').value;
+            const msg = document.getElementById('additionalMsg').value;
+            
+            localStorage.setItem('mujer_profile', JSON.stringify({ name, desc, contact, msg }));
+            
+            const status = document.getElementById('saveStatus');
+            status.classList.remove('hidden');
+            setTimeout(() => status.classList.add('hidden'), 3000);
+        }
+
+        // Load saved message
+        function loadMessage() {
+            const saved = localStorage.getItem('mujer_profile');
+            if (saved) {
+                const data = JSON.parse(saved);
+                document.getElementById('userName').value = data.name || '';
+                document.getElementById('userDesc').value = data.desc || '';
+                document.getElementById('emergencyContact').value = data.contact || '';
+                document.getElementById('additionalMsg').value = data.msg || '';
+            }
+        }
+
+        // Toggle SOS
+        function toggleSOS() {
+            sosActive = !sosActive;
+            const btn = document.getElementById('sosButton');
+            const text = document.getElementById('sosText');
+            const status = document.getElementById('sosStatus');
+            const activeAlert = document.getElementById('activeAlert');
+            
+            if (sosActive) {
+                btn.classList.add('active');
+                text.textContent = 'ACTIVE';
+                status.classList.add('hidden');
+                activeAlert.classList.remove('hidden');
+                
+                // Get location and update receiver panel
+                getLocation();
+                
+                // Start 10-minute update simulation (using 30 seconds for demo)
+                updateInterval = setInterval(getLocation, 30000);
+            } else {
+                btn.classList.remove('active');
+                text.textContent = 'PRESS';
+                status.classList.remove('hidden');
+                activeAlert.classList.add('hidden');
+                
+                // Clear interval
+                if (updateInterval) clearInterval(updateInterval);
+                
+                // Hide receiver panel info
+                document.getElementById('senderProfile').classList.add('hidden');
+                document.getElementById('noAlertMsg').classList.remove('hidden');
+                document.getElementById('mapPlaceholder').classList.remove('hidden');
+                document.getElementById('mapStatus').textContent = 'Waiting for alert...';
+                document.getElementById('mapStatus').className = 'text-xs font-normal px-3 py-1 rounded-full bg-gray-100 text-gray-500';
+            }
+        }
+
+        // Get GPS location
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        updateReceiverPanel(lat, lng);
+                    },
+                    (error) => {
+                        // Demo fallback coordinates (Manila, Philippines)
+                        const lat = 14.5995 + (Math.random() - 0.5) * 0.01;
+                        const lng = 120.9842 + (Math.random() - 0.5) * 0.01;
+                        updateReceiverPanel(lat, lng);
+                    }
+                );
+            } else {
+                // Demo coordinates
+                const lat = 14.5995;
+                const lng = 120.9842;
+                updateReceiverPanel(lat, lng);
+            }
+        }
+
+        // Update receiver panel
+        function updateReceiverPanel(lat, lng) {
+            const saved = localStorage.getItem('mujer_profile');
+            const data = saved ? JSON.parse(saved) : { name: 'Unknown', desc: 'No description', contact: 'N/A', msg: 'N/A' };
+            
+            // Update profile display
+            document.getElementById('noAlertMsg').classList.add('hidden');
+            document.getElementById('senderProfile').classList.remove('hidden');
+            document.getElementById('displayName').textContent = data.name || 'Unknown User';
+            document.getElementById('displayDesc').textContent = data.desc || 'No description provided';
+            document.getElementById('displayContact').textContent = data.contact || 'No contact provided';
+            document.getElementById('displayMsg').textContent = data.msg || 'No additional message';
+            document.getElementById('displayLocation').textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+            
+            // Update time stamps
+            const now = new Date().toLocaleTimeString();
+            document.getElementById('lastUpdate').textContent = `Last update: ${now}`;
+            document.getElementById('lastMapUpdate').textContent = `Last update: ${now}`;
+            
+            // Update map status
+            document.getElementById('mapStatus').textContent = '🔴 LIVE';
+            document.getElementById('mapStatus').className = 'text-xs font-normal px-3 py-1 rounded-full bg-red-100 text-red-600 status-indicator';
+            
+            // Initialize or update map
+            document.getElementById('mapPlaceholder').classList.add('hidden');
+            
+            if (!map) {
+                map = L.map('map').setView([lat, lng], 16);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+            } else {
+                map.setView([lat, lng], 16);
+            }
+            
+            // Add/update marker with custom pink icon
+            const pinkIcon = L.divIcon({
+                className: 'custom-marker',
+                html: `<div style="
+                    width: 30px; 
+                    height: 30px; 
+                    background: linear-gradient(135deg, #e74c3c, #c0392b);
+                    border: 3px solid white;
+                    border-radius: 50%;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                "><span style="color: white; font-size: 14px;">📍</span></div>`,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+            
+            if (marker) {
+                marker.setLatLng([lat, lng]);
+            } else {
+                marker = L.marker([lat, lng], { icon: pinkIcon }).addTo(map);
+            }
+            
+            // Add/update circle overlay (pink)
+            if (circle) {
+                circle.setLatLng([lat, lng]);
+            } else {
+                circle = L.circle([lat, lng], {
+                    color: '#F8BBD0',
+                    fillColor: '#F8BBD0',
+                    fillOpacity: 0.3,
+                    radius: 100
+                }).addTo(map);
+            }
+            
+            // Add popup
+            marker.bindPopup(`
+                <div style="text-align: center; padding: 5px;">
+                    <strong style="color: #8E44AD;">${data.name || 'SOS Alert'}</strong><br>
+                    <span style="color: #e74c3c; font-size: 12px;">🆘 Active Alert</span><br>
+                    <small style="color: #666;">${now}</small>
+                </div>
+            `).openPopup();
+        }
+
+        // Load saved data on page load
+        document.addEventListener('DOMContentLoaded', loadMessage);
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
